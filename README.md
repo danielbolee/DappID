@@ -15,13 +15,16 @@ Users simply connect their Ethereum wallet, enter their ENS name (or use their c
 ## Usage
 
 1. Visit the [DappID site](https://dappid.xyz) and connect your Ethereum wallet
-2. Enter your ENS name or use your connected wallet address
+2. Enter your ENS or Spruce name or use your connected wallet address
 3. Browse the art style options and select your favorite
 4. Mint your unique identity-linked PFP as an NFT!
 
-## Contributing
+## Credits
 
-Pull requests are welcome! Feel free to open an issue for any bugs or feature requests.
+Big thank you to cruip.com for the landing page template to expediate the frontend development process!
+Link to template used: https://github.com/cruip/open-react-template
+
+
 
 ## License
 
