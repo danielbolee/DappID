@@ -1,41 +1,29 @@
-This is a Next.js template designed to get you up and running with a new web3 project as quickly as possible.
+# DappID
 
-## Getting Started
+DappID is a decentralized app that generates unique AI-powered profile picture NFTs based on a user's ENS name or Ethereum wallet address.
 
-Check out the [live demo](https://ens-frontend-template.vercel.app/) to see what this template looks like.
+Users simply connect their Ethereum wallet, enter their ENS name (or use their connected wallet address), customize the art style, and mint a one-of-a-kind identity-linked PFP NFT on the blockchain.
 
-Built with:
+## Features
 
-- [Next.js](https://nextjs.org/)
-- [Thorin](https://thorin.ens.domains/)
-- [Styled Components](https://styled-components.com/)
-- [Viem](https://viem.sh/)
-- [Wagmi](https://wagmi.sh/)
-- [RainbowKit](https://www.rainbowkit.com/)
+- Generate AI-powered profile pictures tailored to any ENS name or wallet address
+- Customize the art style - anime, pixel art, landscapes, and more
+- Seamlessly mint the finalized image as an ERC-721 NFT
+- Supports both ENS names and Ethereum addresses for generation
+- Built with React, Next.js, Thorin, Styled Components, Viem, Wagmi, Rainbowkit
 
-## How to use
+## Usage
 
-Install dependencies:
+1. Visit the [DappID site](https://dappid.xyz) and connect your Ethereum wallet
+2. Enter your ENS or Spruce name or use your connected wallet address
+3. Browse the art style options and select your favorite
+4. Mint your unique identity-linked PFP as an NFT!
 
-```bash
-yarn install
-```
+## Credits
 
-Create a [WalletConnect account](https://cloud.walletconnect.com/sign-in) and add your Project ID to `.env.local`:
+Big thank you to the ENS team for the frontend template to expediate the frontend development process!
+Link to template used: https://github.com/ensdomains/frontend-template/tree/main
 
-```bash
-cp .env.example .env.local
-```
-
-Start the development server:
-
-```bash
-yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
 ## Deploy on Vercel
 
