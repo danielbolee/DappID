@@ -13,7 +13,7 @@ const StyledButton = styled(Button)`
   `}
 `
 
-export function ConnectButton({ updateEnsName }) {
+export function ConnectButton({ updateEnsName, updateAddress }) {
   const { disconnect } = useDisconnect()
 
   return (
@@ -62,7 +62,9 @@ export function ConnectButton({ updateEnsName }) {
               }
 
               if (account.ensName){
+                console.log("Updating ens and address");
                 updateEnsName(account.ensName);
+                updateAddress(account.address);
               }
 
               return (

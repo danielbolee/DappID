@@ -10,12 +10,14 @@ import styled, { css } from 'styled-components'
 import { useState } from 'react';
 
 import generateImage from '@/components/GenerateAIButton';
+import mintImage from '@/components/MintButton';
 
 
 export default function Page() {
 
 
   const [ensName, setEnsName] = useState('');
+  const [connectedAddress, setAddress] = useState('');
   const [artStyle, setArtStyle] = useState(''); 
   const [theme, setTheme] = useState(''); 
   const [poseSetting, setPoseSetting] = useState(''); 
@@ -64,7 +66,8 @@ export default function Page() {
       }
       else{
         console.log('Minting the image as an NFT');
-        // Mint NFT
+        // Calls the mintImage function and passes in the connected users address and the imageUrl
+        await mintImage(connectedAddress, imageUrl);
       }
     } catch (error) {
       // Handle error if minting fails
@@ -73,8 +76,14 @@ export default function Page() {
 
 
   const updateEnsName = (newEnsName) => {
+    console.log("Updating ENS name to :" + newEnsName);
     setEnsName(newEnsName);
   };
+  const updateAddress = (newAddress) => {
+    console.log("Updating address to :" + newAddress);
+    setAddress(newAddress);
+  };
+
   return (
     <>
       <NextSeo title="generate" />
@@ -133,7 +142,7 @@ export default function Page() {
                   <Typography color="textSecondary">
                     Verify ENS
                   </Typography>
-                  <ConnectButton updateEnsName={updateEnsName}/>
+                  <ConnectButton updateEnsName={updateEnsName} updateAddress={updateAddress}/>
                 </OptionRow>
                 <Card.Divider />
 
@@ -224,6 +233,7 @@ export default function Page() {
 
           </ExamplesGrid>
         <Typography color="textSecondary">
+          Address: {connectedAddress}
           ENS Name: {ensName} 
           Art Style: {artStyle} 
           Theme: {theme} 
