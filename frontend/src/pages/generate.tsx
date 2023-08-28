@@ -1,6 +1,6 @@
 import { NextSeo } from 'next-seo'
 
-import { Avatar, Button, Card, EnsSVG, Heading, Typography, Select } from '@ensdomains/thorin'
+import { Avatar, Toast, Skeleton, Button, Card, EnsSVG, Heading, Typography, Select } from '@ensdomains/thorin'
 import { CopySVG, EthSVG, WalletSVG, MoonSVG } from '@ensdomains/thorin'
 
 import { ConnectButton } from '@/components/ConnectButton'
@@ -9,13 +9,50 @@ import styled, { css } from 'styled-components'
 
 import { useState } from 'react';
 
+import generateImage from '@/components/GenerateAIButton';
+
+
 export default function Page() {
 
 
   const [ensName, setEnsName] = useState('');
-  const [artStyle, setArtStyle] = useState(''); // Add state for art style
-  const [theme, setTheme] = useState(''); // Add state for theme
-  const [poseSetting, setPoseSetting] = useState(''); // Add state for pose/setting
+  const [artStyle, setArtStyle] = useState(''); 
+  const [theme, setTheme] = useState(''); 
+  const [poseSetting, setPoseSetting] = useState(''); 
+  const [imageUrl, setImageUrl] = useState(null);
+  const [toastOpen, setToastOpen] = useState(false);
+
+  const handleGenerateClick = async () => {
+    try {
+      console.log('ENS Name:', ensName);
+      console.log('Art Style:', artStyle);
+      console.log('Theme:', theme);
+      console.log('Pose/Setting:', poseSetting);
+      
+      //If any params missing,
+      if (!ensName || !artStyle || !theme || !poseSetting) {
+        setToastOpen(!toastOpen);
+      }
+      else{
+        const AIImageUrl = await generateImage(ensName, artStyle, theme, poseSetting);
+        console.log('Generated Image URL:', imageUrl);
+        setImageUrl(AIImageUrl);
+      }
+    } catch (error) {
+      console.log('Error caused' + error);
+      // Handle error if image generation fails
+    }
+  };
+
+  const handleMintClick = async () => {
+    try {
+      console.log('Minting the image as an NFT');
+      // Mint NFT
+    } catch (error) {
+      // Handle error if minting fails
+    }
+  }
+
 
   const updateEnsName = (newEnsName) => {
     setEnsName(newEnsName);
@@ -29,7 +66,17 @@ export default function Page() {
 
         <Container as="main" $variant="flexVerticalCenter" $width="large">
           <Heading level="1">DappID</Heading>
-          
+
+          <>
+            <Toast
+              description="Select an option for all the parameters."
+              open={toastOpen}
+              title="Finish Parameters"
+              variant="desktop"
+              onClose={() => setToastOpen(false)}
+            >
+            </Toast>
+          </>
           
           <ExamplesGrid>
 
@@ -51,15 +98,19 @@ export default function Page() {
                   <Select
                     autocomplete
                     options={[
-                      { value: '0', label: 'Pixel Art' },
-                      { value: '1', label: 'Anime' },
-                      { value: '2', label: 'Cartoon' },
-                      { value: '3', label: 'Realistic' },
-                      { value: '4', label: 'Abstract' },
-                      { value: '5', label: 'Retro' },
+                      { value: 'Pixel Art', label: 'Pixel Art' },
+                      { value: 'Anime', label: 'Anime' },
+                      { value: 'Cartoon', label: 'Cartoon' },
+                      { value: 'Realistic', label: 'Realistic' },
+                      { value: 'Abstract', label: 'Abstract' },
+                      { value: 'Retro', label: 'Retro' },
                     ]}
                     placeholder="Select an option..."
                     tabIndex="2"
+                    onChange={(event) => {
+                      console.log('Selected Art Style:', event.target);
+                      setArtStyle(event.target.value);
+                    }}
                   />
                 </OptionRow>
                 <OptionRow>
@@ -69,15 +120,19 @@ export default function Page() {
                   <Select
                     autocomplete
                     options={[
-                      { value: '0', label: 'Futuristic' },
-                      { value: '1', label: 'Nature' },
-                      { value: '2', label: 'Space' },
-                      { value: '3', label: 'Music' },
-                      { value: '4', label: 'Gaming' },
-                      { value: '5', label: 'Superhero' },
+                      { value: 'Futuristic', label: 'Futuristic' },
+                      { value: 'Nature', label: 'Nature' },
+                      { value: 'Space', label: 'Space' },
+                      { value: 'Music', label: 'Music' },
+                      { value: 'Gaming', label: 'Gaming' },
+                      { value: 'Superhero', label: 'Superhero' },
                     ]}
                     placeholder="Select an option..."
                     tabIndex="2"
+                    onChange={(event) => {
+                      console.log('Selected Theme:', event.target);
+                      setTheme(event.target.value);
+                    }}
                   />
                 </OptionRow>   
                 <OptionRow>   
@@ -87,33 +142,47 @@ export default function Page() {
                   <Select
                     autocomplete
                     options={[
-                      { value: '0', label: 'Portrait' },
-                      { value: '1', label: 'Full body' },
-                      { value: '2', label: 'Scenic background' },
-                      { value: '3', label: 'Avatar style' },
-                      { value: '4', label: 'With pet or animal' },
+                      { value: 'Portrait', label: 'Portrait' },
+                      { value: 'Full body', label: 'Full body' },
+                      { value: 'Scenic background', label: 'Scenic background' },
+                      { value: 'Avatar style', label: 'Avatar style' },
+                      { value: 'With pet or animal', label: 'With pet or animal' },
                     ]}
                     placeholder="Select an option..."
                     tabIndex="2"
+                    onChange={(event) => {
+                      console.log('Selected Pose/Setting:', event.target);
+                      setPoseSetting(event.target.value);
+                    }}
                   />
                 </OptionRow>
                 <Card.Divider />
-                <Button>
-
-                </Button>              
+                <Button onClick={handleGenerateClick}>
+                  Generate Image
+                </Button>            
               </Card>
             </LeftContent>
             
             <RightContent>
               <Card divider>
-                <Typography color="textSecondary">
-                  ENS Name: {ensName}
-                </Typography>
-                    
+                {imageUrl ? (
+                  <img src={imageUrl} alt="Generated Art" style={{ maxWidth: '100%' }} />
+                ) : (
+                  <img src="placeholder.png" alt="Placeholder" style={{ width: '300px', height: '300px' }} />
+                )}
+                <Button onClick={handleMintClick}>
+                  Mint as NFT
+                </Button>
               </Card>
             </RightContent>
 
           </ExamplesGrid>
+        <Typography color="textSecondary">
+          ENS Name: {ensName} 
+          Art Style: {artStyle} 
+          Theme: {theme} 
+          Pose/Setting: {poseSetting}
+        </Typography>
 
         </Container>
 
@@ -122,6 +191,8 @@ export default function Page() {
     </>
   )
 }
+
+
 const OptionRow = styled.div(
   ({ theme }) => css`
     display: flex;

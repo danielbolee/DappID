@@ -1,98 +1,62 @@
-import { Avatar, Button, Profile, mq } from '@ensdomains/thorin'
-import { ConnectButton as ConnectButtonBase } from '@rainbow-me/rainbowkit'
-import { useEnsAvatar, useEnsName, useDisconnect } from 'wagmi'
-import styled, { css } from 'styled-components'
+import { useState } from 'react';
+import dotenv from 'dotenv';
 
-const StyledButton = styled(Button)`
-  ${({ theme }) => css`
-    width: fit-content;
 
-    ${mq.xs.min(css`
-      min-width: ${theme.space['45']};
-    `)}
-  `}
-`
+const generateImage = async (ensName, artStyle, theme, poseSetting) => {
+  const apiUrl = 'https://stablediffusionapi.com/api/v3/text2img';
+  const apiKey = process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY;
 
-export function GenerateAIButton() {
-  const { disconnect } = useDisconnect()
+  console.log("api key is " + apiKey);
 
-  return (
-    <ConnectButtonBase.Custom>
-      {({
-        account,
-        chain,
-        openAccountModal,
-        openChainModal,
-        openConnectModal,
-        mounted,
-      }) => {
-        const ready = mounted
-        const connected = ready && account && chain
+  var myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
 
-        return (
-          <div
-            {...(!ready && {
-              'aria-hidden': true,
-              style: {
-                opacity: 0,
-                pointerEvents: 'none',
-                userSelect: 'none',
-              },
-            })}
-          >
-            {(() => {
-              if (!connected) {
-                return (
-                  <StyledButton shape="rounded" onClick={openConnectModal}>
-                    Connect
-                  </StyledButton>
-                )
-              }
+  var raw = JSON.stringify({
+    "key": apiKey,
+    "prompt": `ultra realistic close up portrait ((${ensName} ${artStyle} ${theme} ${poseSetting}))`,
+    "negative_prompt": null,
+    "width": "512",
+    "height": "512",
+    "samples": "1",
+    "num_inference_steps": "20",
+    "seed": null,
+    "guidance_scale": 7.5,
+    "safety_checker": "yes",
+    "multi_lingual": "no",
+    "panorama": "no",
+    "self_attention": "no",
+    "upscale": "no",
+    "embeddings_model": null,
+    "webhook": null,
+    "track_id": null
+  });
 
-              if (chain.unsupported) {
-                return (
-                  <StyledButton
-                    shape="rounded"
-                    colorStyle="redPrimary"
-                    onClick={openChainModal}
-                  >
-                    Wrong network
-                  </StyledButton>
-                )
-              }
+  var requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: raw,
+    redirect: 'follow'
+  };
 
-              return (
-                <Profile
-                  address={account.address}
-                  ensName={account.ensName || undefined}
-                  avatar={account.ensAvatar || undefined}
-                  onClick={openAccountModal}
-                  dropdownItems={[
-                    {
-                      label: 'Copy Address',
-                      color: 'text',
-                      onClick: () => copyToClipBoard(account.address),
-                    },
-                    {
-                      label: 'Disconnect',
-                      color: 'red',
-                      onClick: () => disconnect(),
-                    },
-                  ]}
-                />
-              )
-            })()}
-          </div>
-        )
-      }}
-    </ConnectButtonBase.Custom>
-  )
-}
-
-const copyToClipBoard = async (text: string) => {
   try {
-    await navigator.clipboard.writeText(text)
-  } catch (err) {
-    console.error('Failed to copy text: ', err)
+    console.log("Sending and awaiting response from StableDiffusion API");
+    const response = await fetch(apiUrl, requestOptions);
+    const result = await response.json();
+    console.log(result);
+    if (result.output && result.output.length > 0) {
+      console.log(result);
+      const imageUrl = result.output[0];
+      return imageUrl;
+    } else {
+      console.log("Response doesn't contain the 'output' field");
+      return null;
+    }
+  } catch (error) {
+    console.error('Error generating image:', error);
+    return null;
   }
-}
+
+};
+
+export default generateImage;
+
