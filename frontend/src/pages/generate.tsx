@@ -1,6 +1,6 @@
 import { NextSeo } from 'next-seo'
 
-import { Avatar, Toast, Skeleton, Button, Card, EnsSVG, Heading, Typography, Select } from '@ensdomains/thorin'
+import { Avatar, Toast, Dialog, Skeleton, Button, Card, Heading, Typography, Select } from '@ensdomains/thorin'
 import { CopySVG, EthSVG, WalletSVG, MoonSVG } from '@ensdomains/thorin'
 
 import { ConnectButton } from '@/components/ConnectButton'
@@ -20,7 +20,14 @@ export default function Page() {
   const [theme, setTheme] = useState(''); 
   const [poseSetting, setPoseSetting] = useState(''); 
   const [imageUrl, setImageUrl] = useState(null);
-  const [toastOpen, setToastOpen] = useState(false);
+
+  const [ensToast, ensToastOpen] = useState(false);
+  const [paramToast, paramToastOpen] = useState(false);
+  const [imageToast, imageToastOpen] = useState(false);
+
+  
+  const [generateDialog, generateDialogOpen] = useState(false);
+
 
   const handleGenerateClick = async () => {
     try {
@@ -30,10 +37,14 @@ export default function Page() {
       console.log('Pose/Setting:', poseSetting);
       
       //If any params missing,
-      if (!ensName || !artStyle || !theme || !poseSetting) {
-        setToastOpen(!toastOpen);
+      if (!ensName){
+        ensToastOpen(!ensToast);
+      }
+      else if (!artStyle || !theme || !poseSetting) {
+        paramToastOpen(!paramToast);
       }
       else{
+        generateDialogOpen(!generateDialog);
         const AIImageUrl = await generateImage(ensName, artStyle, theme, poseSetting);
         console.log('Generated Image URL:', imageUrl);
         setImageUrl(AIImageUrl);
@@ -46,8 +57,15 @@ export default function Page() {
 
   const handleMintClick = async () => {
     try {
-      console.log('Minting the image as an NFT');
-      // Mint NFT
+      //If imageUrl null, then hasn't generated yet and can't mint
+      if (!imageUrl) {
+        imageToastOpen(!imageToast);
+        console.log('Image not generated yet');
+      }
+      else{
+        console.log('Minting the image as an NFT');
+        // Mint NFT
+      }
     } catch (error) {
       // Handle error if minting fails
     }
@@ -70,12 +88,40 @@ export default function Page() {
           <>
             <Toast
               description="Select an option for all the parameters."
-              open={toastOpen}
+              open={paramToast}
               title="Finish Parameters"
               variant="desktop"
-              onClose={() => setToastOpen(false)}
+              onClose={() => paramToastOpen(false)}
             >
             </Toast>
+            <Toast
+              description="Please use a wallet with a valid ENS."
+              open={ensToast}
+              title="Wallet has no ENS"
+              variant="desktop"
+              onClose={() => ensToastOpen(false)}
+            >
+            </Toast>
+            <Toast
+              description="Please generate an image first."
+              open={imageToast}
+              title="Missing Image to Mint"
+              variant="desktop"
+              onClose={() => imageToastOpen(false)}
+            >
+            </Toast>
+          </>
+          
+          <>
+            <Dialog
+              alert="info"
+              currentStep={1}
+              open={generateDialog}
+              subtitle="AI Image Generating..."
+              title="Success!"
+              onDismiss={() => generateDialogOpen(false)}
+            >
+            </Dialog>
           </>
           
           <ExamplesGrid>
