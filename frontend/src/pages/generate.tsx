@@ -10,10 +10,14 @@ import styled, { css } from 'styled-components'
 import { useState } from 'react';
 
 import generateImage from '@/components/GenerateAIButton';
-import mintImage from '@/components/MintButton';
+import { useContractWrite, useNetwork, useSwitchNetwork  } from 'wagmi'
 
+import { createHelia } from 'helia'
+import { json } from '@helia/json'
 
 export default function Page() {
+  const contractJson = require('../../artifacts/contracts/DappIDMinter.sol/DappIDMinter.json');
+  const contractAddress = '0x547d1Be0ba1FFd6dE9a6C6c5118370903A0A122f';
 
 
   const [ensName, setEnsName] = useState('');
@@ -22,6 +26,7 @@ export default function Page() {
   const [theme, setTheme] = useState(''); 
   const [poseSetting, setPoseSetting] = useState(''); 
   const [imageUrl, setImageUrl] = useState(null);
+  const [nftURI, setNftURI] = useState('');
 
   const [ensToast, ensToastOpen] = useState(false);
   const [paramToast, paramToastOpen] = useState(false);
@@ -30,6 +35,15 @@ export default function Page() {
   
   const [generateDialog, generateDialogOpen] = useState(false);
 
+  const { data, isLoading, isSuccess, write } = useContractWrite({
+    address: '0x547d1Be0ba1FFd6dE9a6C6c5118370903A0A122f',
+    abi: contractJson.abi,
+    functionName: 'safeMint',
+    chainId: 11155111,
+    args: [connectedAddress, nftURI],
+  })
+  const { chain } = useNetwork();
+  const { chains, error, pendingChainId, switchNetwork } = useSwitchNetwork();
 
   const handleGenerateClick = async () => {
     try {
@@ -66,14 +80,26 @@ export default function Page() {
       }
       else{
         console.log('Minting the image as an NFT');
-        // Calls the mintImage function and passes in the connected users address and the imageUrl
-        await mintImage(connectedAddress, imageUrl);
+
+        
+        const helia = await createHelia()
+        const j = json(helia)
+        const myImmutableAddress = await j.add({
+          "description": "AI Generated Profile Picture from DappID.",
+          "image": imageUrl, 
+          "name": ensName + "'s AI PFP"
+        })
+        console.log(myImmutableAddress);
+        
+        console.log(await j.get(myImmutableAddress))
+        switchNetwork?.(11155111);
+        // Calls the useContractWrite
+        write();
       }
     } catch (error) {
       // Handle error if minting fails
     }
   }
-
 
   const updateEnsName = (newEnsName) => {
     console.log("Updating ENS name to :" + newEnsName);
@@ -228,6 +254,8 @@ export default function Page() {
                 <Button onClick={handleMintClick}>
                   Mint as NFT
                 </Button>
+                {isLoading && <div>Check Wallet</div>}
+                {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
               </Card>
             </RightContent>
 
