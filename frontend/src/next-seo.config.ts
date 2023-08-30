@@ -1,9 +1,9 @@
 import { DefaultSeoProps } from 'next-seo'
 
 const config: DefaultSeoProps = {
-  titleTemplate: '%s | ENS Frontend Template',
-  defaultTitle: 'ENS Frontend Template',
-  description: 'Starter web app for web3 developers',
+  titleTemplate: '%s | DappID',
+  defaultTitle: 'DappID',
+  description: 'Create your personalized Profile Picture from your ENS',
   openGraph: {
     type: 'website',
     locale: 'en_US',

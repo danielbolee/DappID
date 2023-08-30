@@ -61,7 +61,7 @@ export function ConnectButton({ updateEnsName, updateAddress }) {
                 )
               }
 
-              if (account.ensName){
+              if (account.ensName){ //Updates the states of the ens/address in the main page
                 console.log("Updating ens and address");
                 updateEnsName(account.ensName);
                 updateAddress(account.address);

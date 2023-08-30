@@ -1,40 +1,48 @@
 import { NextSeo } from 'next-seo'
 
-import { Avatar, Toast, Dialog, Skeleton, Button, Card, Heading, Typography, Select } from '@ensdomains/thorin'
-import { CopySVG, EthSVG, WalletSVG, MoonSVG } from '@ensdomains/thorin'
-
+//Import thorin design components
+import { Avatar, Skeleton, Toast, Dialog, Button, Card, Heading, Typography, Select } from '@ensdomains/thorin'
+//Import custom button logic
 import { ConnectButton } from '@/components/ConnectButton'
+import generateImage from '@/components/GenerateAIButton';
+
+//Other misc imports
 import { Container, Layout } from '@/components/templates'
 import styled, { css } from 'styled-components'
-
 import { useState } from 'react';
-
-import generateImage from '@/components/GenerateAIButton';
-import { useContractWrite, useNetwork, useSwitchNetwork  } from 'wagmi'
+import { useContractWrite, useSwitchNetwork  } from 'wagmi'
 
 import { createHelia } from 'helia'
 import { json } from '@helia/json'
 
 export default function Page() {
   const contractJson = require('../../artifacts/contracts/DappIDMinter.sol/DappIDMinter.json');
+
+  //Address of the minting contract on the Sepolia Testnet
   const contractAddress = '0x547d1Be0ba1FFd6dE9a6C6c5118370903A0A122f';
 
-
+  //States for connected/chosen data
   const [ensName, setEnsName] = useState('');
   const [connectedAddress, setAddress] = useState('');
   const [artStyle, setArtStyle] = useState(''); 
   const [theme, setTheme] = useState(''); 
   const [poseSetting, setPoseSetting] = useState(''); 
+  const [mintTransaction, setMintTrans] = useState('');
+
+  //URL for generated image
   const [imageUrl, setImageUrl] = useState(null);
+  //URI to pass into mint contract
   const [nftURI, setNftURI] = useState('');
 
+  //States for Toast/Dialog popups
   const [ensToast, ensToastOpen] = useState(false);
   const [paramToast, paramToastOpen] = useState(false);
   const [imageToast, imageToastOpen] = useState(false);
-
-  
   const [generateDialog, generateDialogOpen] = useState(false);
+  const [mintDialog, mintDialogOpen] = useState(false);
 
+
+  //Handles data passed into minting contract
   const { data, isLoading, isSuccess, write } = useContractWrite({
     address: '0x547d1Be0ba1FFd6dE9a6C6c5118370903A0A122f',
     abi: contractJson.abi,
@@ -42,9 +50,11 @@ export default function Page() {
     chainId: 11155111,
     args: [connectedAddress, nftURI],
   })
-  const { chain } = useNetwork();
+
+  //For switching network to Sepolia testnet for minting
   const { chains, error, pendingChainId, switchNetwork } = useSwitchNetwork();
 
+  //Handles logic when user tries to generate an image
   const handleGenerateClick = async () => {
     try {
       console.log('ENS Name:', ensName);
@@ -59,18 +69,18 @@ export default function Page() {
       else if (!artStyle || !theme || !poseSetting) {
         paramToastOpen(!paramToast);
       }
-      else{
+      else{ //Generate success, calls API through GenerateAIButton.tsx
         generateDialogOpen(!generateDialog);
         const AIImageUrl = await generateImage(ensName, artStyle, theme, poseSetting);
         console.log('Generated Image URL:', imageUrl);
-        setImageUrl(AIImageUrl);
+        setImageUrl(AIImageUrl); //Updates placeholder URL to newly generated image
       }
     } catch (error) {
-      console.log('Error caused' + error);
-      // Handle error if image generation fails
+      console.log('Error caused' + error); // Handle error if image generation fails
     }
   };
 
+  //Handles logic when user tries to mint as an NFT
   const handleMintClick = async () => {
     try {
       //If imageUrl null, then hasn't generated yet and can't mint
@@ -78,10 +88,10 @@ export default function Page() {
         imageToastOpen(!imageToast);
         console.log('Image not generated yet');
       }
-      else{
+      else{ //Good to start minting process
         console.log('Minting the image as an NFT');
 
-        
+        //Creates helia node to upload json metadata to IPFS
         const helia = await createHelia()
         const j = json(helia)
         const myImmutableAddress = await j.add({
@@ -92,15 +102,18 @@ export default function Page() {
         console.log(myImmutableAddress);
         
         console.log(await j.get(myImmutableAddress))
+        // Switch network to sepolia then mints
         switchNetwork?.(11155111);
-        // Calls the useContractWrite
         write();
+        setMintTrans(JSON.stringify(data));
+        mintDialogOpen(!mintDialog);
       }
     } catch (error) {
-      // Handle error if minting fails
+      console.log('Error caused' + error);  // Handle error if minting fails
     }
   }
 
+  //Functions to update ENS and address as user changes it
   const updateEnsName = (newEnsName) => {
     console.log("Updating ENS name to :" + newEnsName);
     setEnsName(newEnsName);
@@ -120,7 +133,7 @@ export default function Page() {
         <Container as="main" $variant="flexVerticalCenter" $width="large">
           <Heading level="1">DappID</Heading>
 
-          <>
+          <> 
             <Toast
               description="Select an option for all the parameters."
               open={paramToast}
@@ -152,21 +165,30 @@ export default function Page() {
               alert="info"
               currentStep={1}
               open={generateDialog}
-              subtitle="AI Image Generating..."
+              subtitle="AI Image Generating, please wait a few seconds"
               title="Success!"
               onDismiss={() => generateDialogOpen(false)}
             >
             </Dialog>
+            <Dialog
+              alert="info"
+              currentStep={1}
+              open={mintDialog}
+              subtitle={"Follow instructions in your wallet"}
+              title="Minting Started!"
+              onDismiss={() => mintDialogOpen(false)}
+            >
+            </Dialog>
           </>
           
-          <ExamplesGrid>
+          <Grid>
 
-            <LeftContent>
+            <ColContent>
                 
               <Card divider>
                 <OptionRow>
                   <Typography color="textSecondary">
-                    Verify ENS
+                    Connect ENS
                   </Typography>
                   <ConnectButton updateEnsName={updateEnsName} updateAddress={updateAddress}/>
                 </OptionRow>
@@ -242,31 +264,24 @@ export default function Page() {
                   Generate Image
                 </Button>            
               </Card>
-            </LeftContent>
+            </ColContent>
             
-            <RightContent>
+            <ColContent>
               <Card divider>
                 {imageUrl ? (
-                  <img src={imageUrl} alt="Generated Art" style={{ maxWidth: '100%' }} />
+                  <img src={imageUrl} alt="Generated Art" style={{ maxWidth: '300px' }} />
                 ) : (
-                  <img src="placeholder.png" alt="Placeholder" style={{ width: '300px', height: '300px' }} />
+                  <Skeleton loading={true}>
+                    <img src="placeholder.png" alt="Placeholder" style={{ width: '300px', height: '300px' }} />
+                  </Skeleton>
                 )}
                 <Button onClick={handleMintClick}>
                   Mint as NFT
                 </Button>
-                {isLoading && <div>Check Wallet</div>}
-                {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
               </Card>
-            </RightContent>
+            </ColContent>
 
-          </ExamplesGrid>
-        <Typography color="textSecondary">
-          Address: {connectedAddress}
-          ENS Name: {ensName} 
-          Art Style: {artStyle} 
-          Theme: {theme} 
-          Pose/Setting: {poseSetting}
-        </Typography>
+          </Grid>
 
         </Container>
 
@@ -275,7 +290,15 @@ export default function Page() {
     </>
   )
 }
-
+/* For testing above
+<Typography color="textSecondary">
+  Address: {connectedAddress}
+  ENS Name: {ensName} 
+  Art Style: {artStyle} 
+  Theme: {theme} 
+  Pose/Setting: {poseSetting}
+</Typography>
+*/
 
 const OptionRow = styled.div(
   ({ theme }) => css`
@@ -286,7 +309,7 @@ const OptionRow = styled.div(
   `
 );
 
-const ExamplesGrid = styled.div(
+const Grid = styled.div(
   ({ theme }) => css`
     width: 100%;
     display: grid;
@@ -299,16 +322,7 @@ const ExamplesGrid = styled.div(
   `
 )
 
-const LeftContent = styled.div(
-  ({ theme }) => css`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: ${theme.space['4']};
-  `
-);
-
-const RightContent = styled.div(
+const ColContent = styled.div(
   ({ theme }) => css`
     display: flex;
     flex-direction: column;

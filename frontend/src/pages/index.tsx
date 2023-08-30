@@ -3,6 +3,7 @@ import { NextSeo } from 'next-seo'
 import styled, { css } from 'styled-components'
 
 import { Container, Layout } from '@/components/templates'
+import Logo from '../public/DappIDLogo.png';
 
 export default function Home() {
   return (
@@ -15,21 +16,20 @@ export default function Home() {
 
         {/* Main content */}
         <Container as="main" $variant="flexVerticalCenter" $width="large">
-          <SvgWrapper>
-            <EnsSVG />
-          </SvgWrapper>
+          {/* Add DappIDLogo.png under here*/}
+          <img src="DappIDLogo.png" alt="DappID Logo" style={{ width: '100px', height: '100px' }} />
 
           <Heading level="1">DappID</Heading>
 
           <ExamplesGrid>
 
-            <Card title="ENS Profile">
+            <Card title="Personalize your Online Identity." style={{ textAlign: "center" }}>
               <Typography color="textSecondary">
-                Personalize your Online Identity.
+                Create and Mint Unique AI-Generated Avatars with Ease
               </Typography>
 
               <Button as="a" href="/generate">
-                View
+                Get Started
               </Button>
             </Card>
 

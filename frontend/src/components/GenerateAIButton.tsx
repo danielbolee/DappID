@@ -6,14 +6,14 @@ const generateImage = async (ensName, artStyle, theme, poseSetting) => {
   const apiUrl = 'https://stablediffusionapi.com/api/v3/text2img';
   const apiKey = process.env.NEXT_PUBLIC_STABLE_DIFFUSION_API_KEY;
 
-  console.log("api key is " + apiKey);
+  //console.log("api key is " + apiKey);
 
   var myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
   var raw = JSON.stringify({
     "key": apiKey,
-    "prompt": `ultra realistic close up portrait ((${ensName} ${artStyle} ${theme} ${poseSetting}))`,
+    "prompt": `best quality, close up profile picture, an image of a toast inspector, in the art style of ${artStyle}, with a general theme of ${theme}, in  ${poseSetting} pose`,
     "negative_prompt": null,
     "width": "512",
     "height": "512",
@@ -39,7 +39,7 @@ const generateImage = async (ensName, artStyle, theme, poseSetting) => {
   };
 
   try {
-    console.log("Sending and awaiting response from StableDiffusion API");
+    console.log("Sending and awaiting response from StableDiffusion API for prompt: ");
     const response = await fetch(apiUrl, requestOptions);
     const result = await response.json();
     console.log(result);
