@@ -10,7 +10,7 @@ Users simply connect their Ethereum wallet, enter their ENS name (or use their c
 - Customize the art style - anime, pixel art, landscapes, and more
 - Seamlessly mint the finalized image as an ERC-721 NFT
 - Supports both ENS names and Ethereum addresses for generation
-- Built with React, Next.js, Thorin, Styled Components, Viem, Wagmi, Rainbowkit
+- Built with React, Next.js, Thorin, Styled Components, Viem, Wagmi, Rainbowkit, Helia
 
 ## Usage
 
